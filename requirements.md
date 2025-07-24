@@ -1,11 +1,10 @@
 
 # Software Requirements Specification
-## For <project name>
+## For MyCRM
 
 Version 0.1  
-Prepared by <author>  
-<organization>  
-<date created>  
+Prepared by Jason Hogg  
+7/27/2025
 
 Table of Contents
 =================
@@ -50,35 +49,59 @@ Table of Contents
 ## Revision History
 | Name | Date    | Reason For Changes  | Version   |
 | ---- | ------- | ------------------- | --------- |
-|      |         |                     |           |
+| Reqs | 7/27/25 | Initial draft       |    0.1    |
 |      |         |                     |           |
 |      |         |                     |           |
 
 ## 1. Introduction
+The goal of this document is to provide a detailed description of the requirements for our new customer relationship management system - henceforth referred to as MyCRM. 
+
 > This section should provide an overview of the entire document
 
 ### 1.1 Document Purpose
-Describe the purpose of the SRS and its intended audience.
+This document provides functional and non-functional requirements for the new MyCRM system. 
 
 ### 1.2 Product Scope
-Identify the product whose software requirements are specified in this document, including the revision or release number. Explain what the product that is covered by this SRS will do, particularly if this SRS describes only part of the system or a single subsystem. Provide a short description of the software being specified and its purpose, including relevant benefits, objectives, and goals. Relate the software to corporate goals or business strategies. If a separate vision and scope document is available, refer to it rather than duplicating its contents here.
+<!-- Identify the product whose software requirements are specified in this document, including the revision or release number. Explain what the product that is covered by this SRS will do, particularly if this SRS describes only part of the system or a single subsystem. Provide a short description of the software being specified and its purpose, including relevant benefits, objectives, and goals. Relate the software to corporate goals or business strategies. If a separate vision and scope document is available, refer to it rather than duplicating its contents here. -->
+MyCRM is a new web application that will enable its users to track its customers and use AI to generate content as the basis for initiating and following up with customers. This specification document provides initial requirements for the MVP solution with the expectation that  new scenarios and requirements will emerge over time. 
 
 ### 1.3 Definitions, Acronyms and Abbreviations
 
 ### 1.4 References
-List any other documents or Web addresses to which this SRS refers. These may include user interface style guides, contracts, standards, system requirements specifications, use case documents, or a vision and scope document. Provide enough information so that the reader could access a copy of each reference, including title, author, version number, date, and source or location.
+<!-- List any other documents or Web addresses to which this SRS refers. These may include user interface style guides, contracts, standards, system requirements specifications, use case documents, or a vision and scope document. Provide enough information so that the reader could access a copy of each reference, including title, author, version number, date, and source or location.--> 
 
 ### 1.5 Document Overview
 Describe what the rest of the document contains and how it is organized.
 
 ## 2. Product Overview
-> This section should describe the general factors that affect the product and its requirements. This section does not state specific requirements. Instead, it provides a background for those requirements, which are defined in detail in Section 3, and makes them easier to understand.
+MyCRM is a new customer relationship management application that is being developed. 
+<!-- >> This section should describe the general factors that affect the product and its requirements. This section does not state specific requirements. Instead, it provides a background for those requirements, which are defined in detail in Section 3, and makes them easier to understand. -->
 
 ### 2.1 Product Perspective
-Describe the context and origin of the product being specified in this SRS. For example, state whether this product is a follow-on member of a product family, a replacement for certain existing systems, or a new, self-contained product. If the SRS defines a component of a larger system, relate the requirements of the larger system to the functionality of this software and identify interfaces between the two. A simple diagram that shows the major components of the overall system, subsystem interconnections, and external interfaces can be helpful.
+<!-- Describe the context and origin of the product being specified in this SRS. For example, state whether this product is a follow-on member of a product family, a replacement for certain existing systems, or a new, self-contained product. If the SRS defines a component of a larger system, relate the requirements of the larger system to the functionality of this software and identify interfaces between the two. A simple diagram that shows the major components of the overall system, subsystem interconnections, and external interfaces can be helpful. -->
+The application will initially be a standalone web application that will be deployed on Microsoft Azure's cloud. 
 
 ### 2.2 Product Functions
-Summarize the major functions the product must perform or must let the user perform. Details will be provided in Section 3, so only a high level summary (such as a bullet list) is needed here. Organize the functions to make them understandable to any reader of the SRS. A picture of the major groups of related requirements and how they relate, such as a top level data flow diagram or object class diagram, is often effective.
+<!-- Summarize the major functions the product must perform or must let the user perform. Details will be provided in Section 3, so only a high level summary (such as a bullet list) is needed here. Organize the functions to make them understandable to any reader of the SRS. A picture of the major groups of related requirements and how they relate, such as a top level data flow diagram or object class diagram, is often effective. -->
+There are two major scenarios the application will focus on initially
+
+1. Customer management - Functionality to manage the customers including the ability to:
+a. List customers - list all the customers in a table along with their details
+a. Add customer - functionality to add a new customer including the following attributes:
+- First Name
+- Last Name
+- Company Name
+- Title
+- Email 
+- LinkedIn reference URL
+b. Edit customer - the ability to edit a customer
+c. Delete customer - the ability to delete a customer. Deletions should be soft deletes - meaning the database retains the customer yet has a flag to track that the customer is deleted.
+
+2. Customer outreach email - Functionality to enable an outreach email to be generated using GenAI. This functionality should allow:
+- A  customer to be selected from the list of active customers 
+- Outreach template text to be provided. This should allow for 1000 characters of text to be provided that will provide the template for the email that will be sent. 
+- Email preview - use  GenAI  to take the outreach template text and personalize including relevant user details such as contact name and / or company name from the selected user
+- Email send - allow the user to then have the email be sent after approving the email preview 
 
 ### 2.3 Product Constraints
 This subsection should provide a general description of any other items that will limit the developer’s options. These may include:  
