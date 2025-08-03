@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CRMDbOAI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+eef9187f85d4d168dd7dd8aaa72d2a17193ee79c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+31302823998da652e35c7ff7f303cd620bd8adb9")]
 [assembly: System.Reflection.AssemblyProductAttribute("CRMDbOAI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CRMDbOAI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

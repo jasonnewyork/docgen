@@ -64,12 +64,31 @@ namespace CRMDbOAI.Services
 
         public async Task SendEmailsAsync(List<GeneratedEmail> emails)
         {
-            foreach (var email in emails)
+            using (var db = new CRMDbOAI.Models.CRMDbContext())
             {
-                // TODO: Send email via SMTP
-                // TODO: Log email activity to database
+                foreach (var email in emails)
+                {
+                    // Simulate sending email via SMTP
+                    Console.WriteLine($"[SMTP SIM] TO: {email.ToEmail}\nSUBJECT: {email.Subject}\nBODY:\n{email.Body}");
+                    // TODO: Integrate actual SMTP sending here
+
+                    // Log email activity to database
+                    var log = new CRMDbOAI.Models.email_log
+                    {
+                        customer_id = email.CustomerId,
+                        user_id = 1, // TODO: Replace with actual user id from context/session
+                        email_type = "outreach", // TODO: Use actual type if available
+                        subject = email.Subject,
+                        content = email.Body,
+                        recipient_email = email.ToEmail,
+                        sent_date = DateTime.UtcNow,
+                        status = "sent",
+                        error_message = null
+                    };
+                    db.email_logs.Add(log);
+                }
+                await db.SaveChangesAsync();
             }
-            await Task.CompletedTask;
         }
     }
 }
