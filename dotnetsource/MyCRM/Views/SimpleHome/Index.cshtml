@@ -1,0 +1,29 @@
+@{
+    ViewData["Title"] = "MyCRM - Home";
+}
+
+<div class="container mt-5">
+    <div class="jumbotron">
+        <h1 class="display-4">Welcome to MyCRM!</h1>
+        <p class="lead">@ViewBag.Message</p>
+        <hr class="my-4">
+        <p><strong>Current Time:</strong> @ViewBag.Time</p>
+        <p>Your Customer Relationship Management System is up and running.</p>
+        <a class="btn btn-primary btn-lg" href="/SimpleHome/About" role="button">Learn more</a>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <h3>🔐 Authentication</h3>
+            <p>Secure JWT-based authentication system with role-based access control.</p>
+        </div>
+        <div class="col-md-4">
+            <h3>📧 Email Management</h3>
+            <p>Advanced email system with AI-powered content generation and bulk sending capabilities.</p>
+        </div>
+        <div class="col-md-4">
+            <h3>👥 Customer Management</h3>
+            <p>Complete customer lifecycle management with detailed tracking and analytics.</p>
+        </div>
+    </div>
+</div>

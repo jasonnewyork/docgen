@@ -1,0 +1,347 @@
+using MyCRM.Models;
+using MyCRM.Models.DTOs;
+using MyCRM.Repositories;
+using BCrypt.Net;
+
+namespace MyCRM.Services
+{
+    public class UserService
+    {
+        private readonly IUserRepository _userRepository;
+        private readonly IUserRoleRepository _roleRepository;
+        private readonly ILogger<UserService> _logger;
+
+        public UserService(
+            IUserRepository userRepository,
+            IUserRoleRepository roleRepository,
+            ILogger<UserService> logger)
+        {
+            _userRepository = userRepository;
+            _roleRepository = roleRepository;
+            _logger = logger;
+        }
+
+        public async Task<PagedResult<UserDto>> GetUsersAsync(int page, int pageSize, string? searchTerm = null)
+        {
+            try
+            {
+                var users = await _userRepository.GetPagedAsync(page, pageSize, searchTerm);
+                
+                var userDtos = users.Items.Select(u => new UserDto
+                {
+                    UserId = u.UserId,
+                    Username = u.Username,
+                    Email = u.Email,
+                    FirstName = u.FirstName,
+                    LastName = u.LastName,
+                    RoleId = u.RoleId,
+                    RoleName = u.Role?.RoleName ?? "",
+                    IsActive = u.IsActive,
+                    CreatedAt = u.CreatedAt,
+                    CreatedBy = u.CreatedBy,
+                    UpdatedAt = u.UpdatedAt,
+                    UpdatedBy = u.UpdatedBy,
+                    LastLoginDate = u.LastLoginDate,
+                    FailedLoginAttempts = u.FailedLoginAttempts,
+                    LockoutEndDate = u.LockoutEndDate
+                });
+
+                return new PagedResult<UserDto>
+                {
+                    Items = userDtos,
+                    TotalCount = users.TotalCount,
+                    PageNumber = users.PageNumber,
+                    PageSize = users.PageSize
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting users");
+                throw;
+            }
+        }
+
+        public async Task<UserDto?> GetUserByIdAsync(int id)
+        {
+            try
+            {
+                var user = await _userRepository.GetByIdAsync(id);
+                if (user == null) return null;
+
+                return new UserDto
+                {
+                    UserId = user.UserId,
+                    Username = user.Username,
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    RoleId = user.RoleId,
+                    RoleName = user.Role?.RoleName ?? "",
+                    IsActive = user.IsActive,
+                    CreatedAt = user.CreatedAt,
+                    CreatedBy = user.CreatedBy,
+                    UpdatedAt = user.UpdatedAt,
+                    UpdatedBy = user.UpdatedBy,
+                    LastLoginDate = user.LastLoginDate,
+                    FailedLoginAttempts = user.FailedLoginAttempts,
+                    LockoutEndDate = user.LockoutEndDate
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting user {Id}", id);
+                throw;
+            }
+        }
+
+        public async Task<UserDto?> GetUserByUsernameAsync(string username)
+        {
+            try
+            {
+                var user = await _userRepository.GetByUsernameAsync(username);
+                if (user == null) return null;
+
+                return new UserDto
+                {
+                    UserId = user.UserId,
+                    Username = user.Username,
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    RoleId = user.RoleId,
+                    RoleName = user.Role?.RoleName ?? "",
+                    IsActive = user.IsActive,
+                    CreatedAt = user.CreatedAt,
+                    CreatedBy = user.CreatedBy,
+                    UpdatedAt = user.UpdatedAt,
+                    UpdatedBy = user.UpdatedBy,
+                    LastLoginDate = user.LastLoginDate,
+                    FailedLoginAttempts = user.FailedLoginAttempts,
+                    LockoutEndDate = user.LockoutEndDate
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting user by username {Username}", username);
+                throw;
+            }
+        }
+
+        public async Task<UserDto> CreateUserAsync(CreateUserDto createDto, string? createdBy = null)
+        {
+            try
+            {
+                // Check if username already exists
+                if (await _userRepository.UsernameExistsAsync(createDto.Username))
+                {
+                    throw new InvalidOperationException("A user with this username already exists.");
+                }
+
+                // Check if email already exists
+                if (await _userRepository.EmailExistsAsync(createDto.Email))
+                {
+                    throw new InvalidOperationException("A user with this email already exists.");
+                }
+
+                // Verify role exists
+                if (!await _roleRepository.ExistsAsync(createDto.RoleId))
+                {
+                    throw new InvalidOperationException("The specified role does not exist.");
+                }
+
+                var user = new User
+                {
+                    Username = createDto.Username,
+                    Email = createDto.Email,
+                    FirstName = createDto.FirstName,
+                    LastName = createDto.LastName,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(createDto.Password),
+                    RoleId = createDto.RoleId,
+                    CreatedBy = createdBy
+                };
+
+                var createdUser = await _userRepository.CreateAsync(user);
+                var role = await _roleRepository.GetByIdAsync(createdUser.RoleId);
+                
+                _logger.LogInformation("User created: {UserId}", createdUser.UserId);
+
+                return new UserDto
+                {
+                    UserId = createdUser.UserId,
+                    Username = createdUser.Username,
+                    Email = createdUser.Email,
+                    FirstName = createdUser.FirstName,
+                    LastName = createdUser.LastName,
+                    RoleId = createdUser.RoleId,
+                    RoleName = role?.RoleName ?? "",
+                    IsActive = createdUser.IsActive,
+                    CreatedAt = createdUser.CreatedAt,
+                    CreatedBy = createdUser.CreatedBy
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating user");
+                throw;
+            }
+        }
+
+        public async Task<UserDto?> UpdateUserAsync(int id, UpdateUserDto updateDto, string? updatedBy = null)
+        {
+            try
+            {
+                var user = await _userRepository.GetByIdAsync(id);
+                if (user == null) return null;
+
+                // Check if email already exists for another user
+                if (await _userRepository.EmailExistsAsync(updateDto.Email, id))
+                {
+                    throw new InvalidOperationException("A user with this email already exists.");
+                }
+
+                // Verify role exists
+                if (!await _roleRepository.ExistsAsync(updateDto.RoleId))
+                {
+                    throw new InvalidOperationException("The specified role does not exist.");
+                }
+
+                user.Email = updateDto.Email;
+                user.FirstName = updateDto.FirstName;
+                user.LastName = updateDto.LastName;
+                user.RoleId = updateDto.RoleId;
+                user.IsActive = updateDto.IsActive;
+                user.UpdatedBy = updatedBy;
+
+                var updatedUser = await _userRepository.UpdateAsync(user);
+                var role = await _roleRepository.GetByIdAsync(updatedUser.RoleId);
+                
+                _logger.LogInformation("User updated: {UserId}", updatedUser.UserId);
+
+                return new UserDto
+                {
+                    UserId = updatedUser.UserId,
+                    Username = updatedUser.Username,
+                    Email = updatedUser.Email,
+                    FirstName = updatedUser.FirstName,
+                    LastName = updatedUser.LastName,
+                    RoleId = updatedUser.RoleId,
+                    RoleName = role?.RoleName ?? "",
+                    IsActive = updatedUser.IsActive,
+                    CreatedAt = updatedUser.CreatedAt,
+                    CreatedBy = updatedUser.CreatedBy,
+                    UpdatedAt = updatedUser.UpdatedAt,
+                    UpdatedBy = updatedUser.UpdatedBy,
+                    LastLoginDate = updatedUser.LastLoginDate,
+                    FailedLoginAttempts = updatedUser.FailedLoginAttempts,
+                    LockoutEndDate = updatedUser.LockoutEndDate
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating user {Id}", id);
+                throw;
+            }
+        }
+
+        public async Task<bool> ChangePasswordAsync(int userId, ChangePasswordDto changePasswordDto)
+        {
+            try
+            {
+                var user = await _userRepository.GetByIdAsync(userId);
+                if (user == null) return false;
+
+                // Verify current password
+                if (!BCrypt.Net.BCrypt.Verify(changePasswordDto.CurrentPassword, user.PasswordHash))
+                {
+                    throw new InvalidOperationException("Current password is incorrect.");
+                }
+
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(changePasswordDto.NewPassword);
+                await _userRepository.UpdateAsync(user);
+                
+                _logger.LogInformation("Password changed for user: {UserId}", userId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error changing password for user {UserId}", userId);
+                throw;
+            }
+        }
+
+        public async Task<bool> DeleteUserAsync(int id)
+        {
+            try
+            {
+                var result = await _userRepository.DeleteAsync(id);
+                if (result)
+                {
+                    _logger.LogInformation("User deleted: {UserId}", id);
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting user {Id}", id);
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<UserDto>> GetActiveUsersAsync()
+        {
+            try
+            {
+                var users = await _userRepository.GetActiveUsersAsync();
+                return users.Select(u => new UserDto
+                {
+                    UserId = u.UserId,
+                    Username = u.Username,
+                    Email = u.Email,
+                    FirstName = u.FirstName,
+                    LastName = u.LastName,
+                    RoleId = u.RoleId,
+                    RoleName = u.Role?.RoleName ?? "",
+                    IsActive = u.IsActive,
+                    CreatedAt = u.CreatedAt,
+                    CreatedBy = u.CreatedBy,
+                    UpdatedAt = u.UpdatedAt,
+                    UpdatedBy = u.UpdatedBy,
+                    LastLoginDate = u.LastLoginDate,
+                    FailedLoginAttempts = u.FailedLoginAttempts,
+                    LockoutEndDate = u.LockoutEndDate
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting active users");
+                throw;
+            }
+        }
+
+        public async Task<bool> UserExistsAsync(int id)
+        {
+            return await _userRepository.ExistsAsync(id);
+        }
+
+        public async Task<int> GetTotalUserCountAsync()
+        {
+            return await _userRepository.GetTotalCountAsync();
+        }
+
+        public async Task<bool> ValidateUserCredentialsAsync(string username, string password)
+        {
+            try
+            {
+                var user = await _userRepository.GetByUsernameAsync(username);
+                if (user == null || !user.IsActive) return false;
+
+                return BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error validating credentials for user {Username}", username);
+                return false;
+            }
+        }
+    }
+}

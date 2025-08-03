@@ -1,0 +1,20 @@
+@model CRMDbOAI.Models.customer
+@{
+    ViewData["Title"] = "Delete Customer";
+}
+<h2>Delete Customer</h2>
+<div class="alert alert-warning">
+    <strong>Are you sure you want to delete this customer?</strong>
+</div>
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">@Model.company_name</h5>
+        <p><strong>Contact:</strong> @Model.contact_first_name @Model.contact_last_name</p>
+        <p><strong>Email:</strong> @Model.contact_email</p>
+        <form asp-action="Delete" method="post">
+            <input type="hidden" asp-for="customer_id" />
+            <button type="submit" class="btn btn-danger">Delete</button>
+            <a class="btn btn-secondary" asp-action="Index">Cancel</a>
+        </form>
+    </div>
+</div>

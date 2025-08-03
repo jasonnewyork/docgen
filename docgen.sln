@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dotnetsource", "dotnetsource", "{AD4B6D5A-5DB8-DFF6-EAB9-F983C9387667}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyCRM", "dotnetsource\MyCRM\MyCRM.csproj", "{C0C8983D-E9AF-57EC-7931-CDD65520AA01}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C0C8983D-E9AF-57EC-7931-CDD65520AA01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0C8983D-E9AF-57EC-7931-CDD65520AA01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0C8983D-E9AF-57EC-7931-CDD65520AA01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0C8983D-E9AF-57EC-7931-CDD65520AA01}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C0C8983D-E9AF-57EC-7931-CDD65520AA01} = {AD4B6D5A-5DB8-DFF6-EAB9-F983C9387667}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A2073CD7-6B88-4D4E-A68A-EEB17EA49717}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,23 @@
+@model dynamic
+@{
+    ViewData["Title"] = "Create Outreach Email";
+    var customers = ViewBag.Customers as IEnumerable<CRMDbOAI.Models.customer>;
+}
+<h2>Create Outreach Email</h2>
+<form asp-action="Preview" method="post">
+    <div class="form-group">
+        <label>Select Customers</label>
+        <select name="selectedCustomerIds" multiple class="form-control">
+            @foreach (var c in customers)
+            {
+                <option value="@c.customer_id">@c.company_name (@c.contact_first_name @c.contact_last_name)</option>
+            }
+        </select>
+    </div>
+    <div class="form-group">
+        <label>Email Template</label>
+        <textarea name="templateText" class="form-control" rows="5" maxlength="1000" placeholder="Enter outreach template (max 1000 chars)"></textarea>
+        <small>Use <b>{ContactName}</b> and <b>{CompanyName}</b> for personalization.</small>
+    </div>
+    <button type="submit" class="btn btn-primary">Preview Emails</button>
+</form>

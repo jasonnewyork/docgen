@@ -1,0 +1,78 @@
+@model List<CRMDbOAI.Services.GeneratedEmail>
+@{
+    ViewData["Title"] = "Preview Outreach Emails";
+    var templateText = ViewBag.TemplateText as string;
+}
+
+<h2>Email Preview</h2>
+@if (Model != null && Model.Count > 0)
+{
+    var email = Model[0];
+    <form asp-action="Send" method="post">
+        <input type="hidden" name="emails[0].CustomerId" value="@email.CustomerId" />
+        <input type="hidden" name="emails[0].ToEmail" value="@email.ToEmail" />
+        <input type="hidden" name="emails[0].Subject" value="@email.Subject" />
+        <input type="hidden" name="emails[0].IsCompliant" value="@email.IsCompliant" />
+        <input type="hidden" name="emails[0].ComplianceSummary" value="@email.ComplianceSummary" />
+        <div class="card" style="max-width:600px;margin:auto;box-shadow:0 2px 8px #ccc;padding:2em;">
+            <div style="margin-bottom:1em;">
+                <strong>TO:</strong> @email.ToEmail<br />
+                <strong>FROM:</strong> noreply@mycrm.com<br />
+                <strong>SUBJECT:</strong> <input type="text" name="emails[0].Subject" value="@email.Subject" class="form-control" style="display:inline-block;width:80%;margin-top:0.5em;" />
+            </div>
+            <div style="margin-bottom:1em;">
+                <strong>Body:</strong><br />
+                <textarea name="emails[0].Body" class="form-control" rows="12" style="width:100%;resize:vertical">@email.Body</textarea>
+            </div>
+            <div style="margin-bottom:1em;">
+                <strong>Compliance Findings:</strong><br />
+                <div>
+                    <strong>HIPAA Compliance:</strong><br />
+                    <span style="margin-left:1em">
+                        @if (email.ComplianceSummary.ToLower().Contains("hipaa") && email.ComplianceSummary.ToLower().Contains("compliant"))
+                        {
+                            <span class="text-success">Compliant</span>
+                        }
+                        else if (email.ComplianceSummary.ToLower().Contains("hipaa"))
+                        {
+                            <span class="text-danger">Non-compliant</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Not specified</span>
+                        }
+                    </span>
+                </div>
+                <div style="margin-top:1em;">
+                    <strong>Responsible AI (RAI) Compliance:</strong><br />
+                    <span style="margin-left:1em">
+                        @if (email.ComplianceSummary.ToLower().Contains("responsible ai") && email.ComplianceSummary.ToLower().Contains("compliant"))
+                        {
+                            <span class="text-success">Compliant</span>
+                        }
+                        else if (email.ComplianceSummary.ToLower().Contains("responsible ai"))
+                        {
+                            <span class="text-danger">Non-compliant</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Not specified</span>
+                        }
+                    </span>
+                </div>
+                <div style="margin-top:1em;white-space:pre-line;">
+                    <strong>Compliance Details:</strong><br />
+                    @email.ComplianceSummary
+                </div>
+            </div>
+        </div>
+        <div style="text-align:center;margin-top:2em;">
+            <button type="submit" class="btn btn-success">Send Email</button>
+            <a asp-action="Create" class="btn btn-secondary" style="margin-left:1em;">Back</a>
+        </div>
+    </form>
+}
+else
+{
+    <div class="alert alert-warning">No email to preview.</div>
+}

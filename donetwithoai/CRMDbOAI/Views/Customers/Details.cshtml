@@ -1,0 +1,18 @@
+@model CRMDbOAI.Models.customer
+@{
+    ViewData["Title"] = "Customer Details";
+}
+<h2>Customer Details</h2>
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">@Model.company_name</h5>
+        <p><strong>Contact:</strong> @Model.contact_first_name @Model.contact_last_name</p>
+        <p><strong>Email:</strong> @Model.contact_email</p>
+        <p><strong>Address:</strong> @Model.address, @Model.city, @Model.state, @Model.country, @Model.postal_code</p>
+        <p><strong>Industry:</strong> @Model.industry</p>
+        <p><strong>Status:</strong> @(Model.is_active == true ? "Active" : "Inactive")</p>
+        <a class="btn btn-secondary" asp-action="Index">Back to List</a>
+        <a class="btn btn-warning" asp-action="Edit" asp-route-id="@Model.customer_id">Edit</a>
+        <a class="btn btn-danger" asp-action="Delete" asp-route-id="@Model.customer_id">Delete</a>
+    </div>
+</div>

@@ -1,0 +1,33 @@
+@model CRMDbOAI.Models.user
+@{
+    ViewData["Title"] = "Create User";
+}
+<h2>Create User</h2>
+<form asp-action="Create" method="post">
+    <div class="form-group">
+        <label asp-for="username"></label>
+        <input asp-for="username" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="email"></label>
+        <input asp-for="email" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="first_name"></label>
+        <input asp-for="first_name" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="last_name"></label>
+        <input asp-for="last_name" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="password_hash"></label>
+        <input asp-for="password_hash" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="role_id"></label>
+        <select asp-for="role_id" class="form-control" asp-items="ViewBag.Roles"></select>
+    </div>
+    <button type="submit" class="btn btn-primary">Create</button>
+    <a class="btn btn-secondary" asp-action="Index">Cancel</a>
+</form>

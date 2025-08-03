@@ -1,0 +1,428 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using MyCRM.Services;
+using MyCRM.Models.DTOs;
+using System.Security.Claims;
+
+namespace MyCRM.Controllers
+{
+    [Authorize(Roles = "Administrator")]
+    public class UserController : Controller
+    {
+        private readonly UserService _userService;
+        private readonly ILogger<UserController> _logger;
+
+        public UserController(UserService userService, ILogger<UserController> logger)
+        {
+            _userService = userService;
+            _logger = logger;
+        }
+
+        // GET: User
+        public async Task<IActionResult> Index(int page = 1, int pageSize = 20, string search = "", string role = "")
+        {
+            try
+            {
+                var users = await _userService.GetUsersAsync(page, pageSize, search, role);
+                var roles = await _userService.GetUserRolesAsync();
+                
+                ViewBag.Search = search;
+                ViewBag.Role = role;
+                ViewBag.PageSize = pageSize;
+                ViewBag.Roles = roles;
+                
+                return View(users);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving users");
+                TempData["Error"] = "An error occurred while retrieving users.";
+                return View(new PagedResult<UserDto>());
+            }
+        }
+
+        // GET: User/Details/5
+        public async Task<IActionResult> Details(int id)
+        {
+            try
+            {
+                var user = await _userService.GetUserByIdAsync(id);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+                return View(user);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving user {UserId}", id);
+                TempData["Error"] = "An error occurred while retrieving the user.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        // GET: User/Create
+        public async Task<IActionResult> Create()
+        {
+            try
+            {
+                var roles = await _userService.GetUserRolesAsync();
+                ViewBag.Roles = roles;
+                return View(new CreateUserDto());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading create user page");
+                TempData["Error"] = "An error occurred while loading the create user page.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        // POST: User/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(CreateUserDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                var roles = await _userService.GetUserRolesAsync();
+                ViewBag.Roles = roles;
+                return View(dto);
+            }
+
+            try
+            {
+                var createdBy = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var user = await _userService.CreateUserAsync(dto, createdBy);
+                TempData["Success"] = "User created successfully.";
+                return RedirectToAction(nameof(Details), new { id = user.UserId });
+            }
+            catch (ArgumentException ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                var roles = await _userService.GetUserRolesAsync();
+                ViewBag.Roles = roles;
+                return View(dto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating user");
+                ModelState.AddModelError("", "An error occurred while creating the user.");
+                var roles = await _userService.GetUserRolesAsync();
+                ViewBag.Roles = roles;
+                return View(dto);
+            }
+        }
+
+        // GET: User/Edit/5
+        public async Task<IActionResult> Edit(int id)
+        {
+            try
+            {
+                var user = await _userService.GetUserByIdAsync(id);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                var dto = new UpdateUserDto
+                {
+                    UserId = user.UserId,
+                    Username = user.Username,
+                    Email = user.Email,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    RoleId = user.RoleId,
+                    IsActive = user.IsActive
+                };
+
+                var roles = await _userService.GetUserRolesAsync();
+                ViewBag.Roles = roles;
+                return View(dto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving user {UserId} for edit", id);
+                TempData["Error"] = "An error occurred while retrieving the user.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        // POST: User/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, UpdateUserDto dto)
+        {
+            if (id != dto.UserId)
+            {
+                return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var roles = await _userService.GetUserRolesAsync();
+                ViewBag.Roles = roles;
+                return View(dto);
+            }
+
+            try
+            {
+                var updatedBy = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                await _userService.UpdateUserAsync(dto, updatedBy);
+                TempData["Success"] = "User updated successfully.";
+                return RedirectToAction(nameof(Details), new { id = dto.UserId });
+            }
+            catch (ArgumentException ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                var roles = await _userService.GetUserRolesAsync();
+                ViewBag.Roles = roles;
+                return View(dto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating user {UserId}", id);
+                ModelState.AddModelError("", "An error occurred while updating the user.");
+                var roles = await _userService.GetUserRolesAsync();
+                ViewBag.Roles = roles;
+                return View(dto);
+            }
+        }
+
+        // GET: User/Delete/5
+        public async Task<IActionResult> Delete(int id)
+        {
+            try
+            {
+                var user = await _userService.GetUserByIdAsync(id);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                // Prevent deleting own account
+                var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (currentUserId == id.ToString())
+                {
+                    TempData["Error"] = "You cannot delete your own account.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                return View(user);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving user {UserId} for delete", id);
+                TempData["Error"] = "An error occurred while retrieving the user.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        // POST: User/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            try
+            {
+                // Prevent deleting own account
+                var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (currentUserId == id.ToString())
+                {
+                    TempData["Error"] = "You cannot delete your own account.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                var deletedBy = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                await _userService.DeleteUserAsync(id, deletedBy);
+                TempData["Success"] = "User deleted successfully.";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (ArgumentException ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting user {UserId}", id);
+                TempData["Error"] = "An error occurred while deleting the user.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        // GET: User/ChangePassword/5
+        public async Task<IActionResult> ChangePassword(int id)
+        {
+            try
+            {
+                var user = await _userService.GetUserByIdAsync(id);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                var dto = new ChangePasswordDto
+                {
+                    UserId = user.UserId
+                };
+
+                ViewBag.User = user;
+                return View(dto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading change password page for user {UserId}", id);
+                TempData["Error"] = "An error occurred while loading the change password page.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        // POST: User/ChangePassword/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(int id, ChangePasswordDto dto)
+        {
+            if (id != dto.UserId)
+            {
+                return BadRequest();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var user = await _userService.GetUserByIdAsync(id);
+                ViewBag.User = user;
+                return View(dto);
+            }
+
+            try
+            {
+                var updatedBy = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                await _userService.ChangePasswordAsync(dto, updatedBy);
+                TempData["Success"] = "Password changed successfully.";
+                return RedirectToAction(nameof(Details), new { id = dto.UserId });
+            }
+            catch (ArgumentException ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                var user = await _userService.GetUserByIdAsync(id);
+                ViewBag.User = user;
+                return View(dto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error changing password for user {UserId}", id);
+                ModelState.AddModelError("", "An error occurred while changing the password.");
+                var user = await _userService.GetUserByIdAsync(id);
+                ViewBag.User = user;
+                return View(dto);
+            }
+        }
+
+        // GET: User/ActivityLog/5
+        public async Task<IActionResult> ActivityLog(int id, int page = 1, int pageSize = 20, DateTime? startDate = null, DateTime? endDate = null)
+        {
+            try
+            {
+                var user = await _userService.GetUserByIdAsync(id);
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                var activityLog = await _userService.GetUserActivityLogAsync(id, page, pageSize, startDate, endDate);
+                
+                ViewBag.User = user;
+                ViewBag.PageSize = pageSize;
+                ViewBag.StartDate = startDate?.ToString("yyyy-MM-dd");
+                ViewBag.EndDate = endDate?.ToString("yyyy-MM-dd");
+                
+                return View(activityLog);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving activity log for user {UserId}", id);
+                TempData["Error"] = "An error occurred while retrieving the activity log.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+        }
+
+        // POST: User/ResetFailedAttempts/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetFailedAttempts(int id)
+        {
+            try
+            {
+                var updatedBy = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                await _userService.ResetFailedLoginAttemptsAsync(id, updatedBy);
+                TempData["Success"] = "Failed login attempts reset successfully.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+            catch (ArgumentException ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction(nameof(Details), new { id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error resetting failed attempts for user {UserId}", id);
+                TempData["Error"] = "An error occurred while resetting failed login attempts.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+        }
+
+        // GET: User/Roles
+        public async Task<IActionResult> Roles()
+        {
+            try
+            {
+                var roles = await _userService.GetUserRolesAsync();
+                return View(roles);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving user roles");
+                TempData["Error"] = "An error occurred while retrieving user roles.";
+                return View(new List<UserRoleDto>());
+            }
+        }
+
+        // GET: User/Analytics
+        public async Task<IActionResult> Analytics(DateTime? startDate = null, DateTime? endDate = null)
+        {
+            try
+            {
+                var analytics = await _userService.GetUserAnalyticsAsync(startDate, endDate);
+                ViewBag.StartDate = startDate?.ToString("yyyy-MM-dd");
+                ViewBag.EndDate = endDate?.ToString("yyyy-MM-dd");
+                return View(analytics);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving user analytics");
+                TempData["Error"] = "An error occurred while retrieving user analytics.";
+                return View(new UserAnalyticsDto());
+            }
+        }
+
+        // GET: User/Export
+        public async Task<IActionResult> Export(string search = "", string role = "", string format = "csv")
+        {
+            try
+            {
+                var exportData = await _userService.ExportUsersAsync(search, role, format);
+                var fileName = $"users_{DateTime.Now:yyyyMMdd_HHmmss}.{format}";
+                var contentType = format.ToLower() == "csv" ? "text/csv" : "application/json";
+                
+                return File(exportData, contentType, fileName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting users");
+                TempData["Error"] = "An error occurred while exporting users.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+    }
+}

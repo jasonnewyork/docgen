@@ -1,0 +1,17 @@
+@model CRMDbOAI.Models.user
+@{
+    ViewData["Title"] = "User Details";
+}
+<h2>User Details</h2>
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">@Model.username</h5>
+        <p><strong>Email:</strong> @Model.email</p>
+        <p><strong>Name:</strong> @Model.first_name @Model.last_name</p>
+        <p><strong>Role ID:</strong> @Model.role_id</p>
+        <p><strong>Status:</strong> @(Model.is_active == true ? "Active" : "Inactive")</p>
+        <a class="btn btn-secondary" asp-action="Index">Back to List</a>
+        <a class="btn btn-warning" asp-action="Edit" asp-route-id="@Model.user_id">Edit</a>
+        <a class="btn btn-danger" asp-action="Delete" asp-route-id="@Model.user_id">Delete</a>
+    </div>
+</div>

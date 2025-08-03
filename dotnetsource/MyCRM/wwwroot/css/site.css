@@ -1,0 +1,143 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  white-space: nowrap;
+  line-height: 60px;
+}
+
+/* Custom styles for MyCRM */
+.navbar-brand {
+  font-weight: bold;
+}
+
+.card {
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.btn {
+  border-radius: 6px;
+}
+
+.form-control {
+  border-radius: 6px;
+}
+
+.table th {
+  background-color: #f8f9fa;
+  border-top: none;
+}
+
+.status-badge {
+  font-size: 0.75em;
+  padding: 0.25em 0.5em;
+}
+
+.email-preview {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.compliance-indicator {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
+.compliance-pass {
+  background-color: #28a745;
+}
+
+.compliance-fail {
+  background-color: #dc3545;
+}
+
+.compliance-warning {
+  background-color: #ffc107;
+}
+
+.sidebar {
+  background-color: #f8f9fa;
+  min-height: calc(100vh - 160px);
+  padding: 1rem;
+}
+
+.main-content {
+  padding: 1rem;
+}
+
+.alert-dismissible .btn-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 2;
+  padding: 1.25rem 1rem;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255,255,255,.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.text-muted-small {
+  font-size: 0.875em;
+  color: #6c757d;
+}
+
+.border-left-primary {
+  border-left: 4px solid #007bff;
+}
+
+.border-left-success {
+  border-left: 4px solid #28a745;
+}
+
+.border-left-warning {
+  border-left: 4px solid #ffc107;
+}
+
+.border-left-danger {
+  border-left: 4px solid #dc3545;
+}

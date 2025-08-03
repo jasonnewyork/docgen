@@ -1,0 +1,37 @@
+@{
+    ViewData["Title"] = "About MyCRM";
+}
+
+<div class="container mt-5">
+    <h1>About MyCRM</h1>
+    <p class="lead">@ViewBag.Message</p>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <h3>Features</h3>
+            <ul>
+                <li><strong>Customer Management:</strong> Complete CRUD operations for customer data</li>
+                <li><strong>Email System:</strong> Send individual and bulk emails with templates</li>
+                <li><strong>AI Integration:</strong> AI-powered email content generation</li>
+                <li><strong>Authentication:</strong> JWT-based security with role management</li>
+                <li><strong>Analytics:</strong> Email tracking and customer insights</li>
+                <li><strong>Export/Import:</strong> Data management capabilities</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3>Technology Stack</h3>
+            <ul>
+                <li><strong>Backend:</strong> .NET 9, ASP.NET Core MVC</li>
+                <li><strong>Database:</strong> SQL Server with Entity Framework Core</li>
+                <li><strong>Authentication:</strong> JWT Bearer tokens</li>
+                <li><strong>Logging:</strong> Serilog with structured logging</li>
+                <li><strong>API Documentation:</strong> Swagger/OpenAPI</li>
+                <li><strong>Architecture:</strong> Repository pattern with dependency injection</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <a href="/SimpleHome/Index" class="btn btn-primary">← Back to Home</a>
+    </div>
+</div>

@@ -1,0 +1,50 @@
+@model CRMDbOAI.Models.customer
+@{
+    ViewData["Title"] = "Edit Customer";
+}
+<h2>Edit Customer</h2>
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="customer_id" />
+    <div class="form-group">
+        <label asp-for="company_name"></label>
+        <input asp-for="company_name" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="contact_first_name"></label>
+        <input asp-for="contact_first_name" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="contact_last_name"></label>
+        <input asp-for="contact_last_name" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="contact_email"></label>
+        <input asp-for="contact_email" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="address"></label>
+        <input asp-for="address" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="city"></label>
+        <input asp-for="city" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="state"></label>
+        <input asp-for="state" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="country"></label>
+        <input asp-for="country" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="postal_code"></label>
+        <input asp-for="postal_code" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="industry"></label>
+        <input asp-for="industry" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a class="btn btn-secondary" asp-action="Index">Cancel</a>
+</form>

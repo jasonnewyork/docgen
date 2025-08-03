@@ -1,0 +1,183 @@
+using Microsoft.EntityFrameworkCore;
+using MyCRM.Data;
+using MyCRM.Models;
+using MyCRM.Models.DTOs;
+
+namespace MyCRM.Repositories
+{
+    public class UserRepository : IUserRepository
+    {
+        private readonly CrmDbContext _context;
+
+        public UserRepository(CrmDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<IEnumerable<User>> GetAllAsync()
+        {
+            return await _context.Users
+                .Include(u => u.Role)
+                .OrderBy(u => u.Username)
+                .ToListAsync();
+        }
+
+        public async Task<User?> GetByIdAsync(int id)
+        {
+            return await _context.Users
+                .Include(u => u.Role)
+                .Include(u => u.EmailLogs)
+                .FirstOrDefaultAsync(u => u.UserId == id);
+        }
+
+        public async Task<User?> GetByUsernameAsync(string username)
+        {
+            return await _context.Users
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u => u.Username == username);
+        }
+
+        public async Task<User?> GetByEmailAsync(string email)
+        {
+            return await _context.Users
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u => u.Email == email);
+        }
+
+        public async Task<PagedResult<User>> GetPagedAsync(int page, int pageSize, string? searchTerm = null)
+        {
+            var query = _context.Users.Include(u => u.Role);
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                searchTerm = searchTerm.ToLower();
+                query = query.Where(u => 
+                    u.Username.ToLower().Contains(searchTerm) ||
+                    u.Email.ToLower().Contains(searchTerm) ||
+                    u.FirstName.ToLower().Contains(searchTerm) ||
+                    u.LastName.ToLower().Contains(searchTerm));
+            }
+
+            var totalCount = await query.CountAsync();
+            var items = await query
+                .OrderBy(u => u.Username)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PagedResult<User>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                PageNumber = page,
+                PageSize = pageSize
+            };
+        }
+
+        public async Task<User> CreateAsync(User user)
+        {
+            user.CreatedAt = DateTime.UtcNow;
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
+            return user;
+        }
+
+        public async Task<User> UpdateAsync(User user)
+        {
+            user.UpdatedAt = DateTime.UtcNow;
+            _context.Entry(user).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+            return user;
+        }
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null) return false;
+
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> ExistsAsync(int id)
+        {
+            return await _context.Users.AnyAsync(u => u.UserId == id);
+        }
+
+        public async Task<bool> UsernameExistsAsync(string username, int? excludeId = null)
+        {
+            var query = _context.Users.Where(u => u.Username == username);
+            if (excludeId.HasValue)
+            {
+                query = query.Where(u => u.UserId != excludeId.Value);
+            }
+            return await query.AnyAsync();
+        }
+
+        public async Task<bool> EmailExistsAsync(string email, int? excludeId = null)
+        {
+            var query = _context.Users.Where(u => u.Email == email);
+            if (excludeId.HasValue)
+            {
+                query = query.Where(u => u.UserId != excludeId.Value);
+            }
+            return await query.AnyAsync();
+        }
+
+        public async Task<int> GetTotalCountAsync()
+        {
+            return await _context.Users.CountAsync();
+        }
+
+        public async Task<IEnumerable<User>> GetActiveUsersAsync()
+        {
+            return await _context.Users
+                .Include(u => u.Role)
+                .Where(u => u.IsActive)
+                .OrderBy(u => u.Username)
+                .ToListAsync();
+        }
+
+        public async Task UpdateLastLoginAsync(int userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user != null)
+            {
+                user.LastLoginDate = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task IncrementFailedLoginAttemptsAsync(int userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user != null)
+            {
+                user.FailedLoginAttempts++;
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task ResetFailedLoginAttemptsAsync(int userId)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user != null)
+            {
+                user.FailedLoginAttempts = 0;
+                user.LockoutEndDate = null;
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task SetLockoutAsync(int userId, DateTime lockoutEnd)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user != null)
+            {
+                user.LockoutEndDate = lockoutEnd;
+                await _context.SaveChangesAsync();
+            }
+        }
+    }
+}

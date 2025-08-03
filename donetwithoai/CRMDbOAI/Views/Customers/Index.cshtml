@@ -1,0 +1,33 @@
+@model IEnumerable<CRMDbOAI.Models.customer>
+@{
+    ViewData["Title"] = "Customers";
+}
+<h2>Customers</h2>
+<p>
+    <a class="btn btn-primary" asp-action="Create">Create New</a>
+</p>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Company Name</th>
+            <th>Contact Name</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.company_name</td>
+            <td>@item.contact_first_name @item.contact_last_name</td>
+            <td>@item.contact_email</td>
+            <td>
+                <a class="btn btn-info btn-sm" asp-action="Details" asp-route-id="@item.customer_id">Details</a>
+                <a class="btn btn-warning btn-sm" asp-action="Edit" asp-route-id="@item.customer_id">Edit</a>
+                <a class="btn btn-danger btn-sm" asp-action="Delete" asp-route-id="@item.customer_id">Delete</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
